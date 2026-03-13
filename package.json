@@ -1,0 +1,25 @@
+{
+  "name": "cloakery",
+  "version": "0.0.1",
+  "description": "privacy-first email relay service",
+  "homepage": "https://github.com/fterh/cloakery#readme",
+  "bugs": {
+    "url": "https://github.com/fterh/cloakery/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fterh/cloakery.git"
+  },
+  "license": "GPL-3.0-only",
+  "author": "Fabian Terh",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  }
+}
