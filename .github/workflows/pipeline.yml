@@ -1,0 +1,37 @@
+name: cloakery CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validation (Lint, TypeCheck, Test)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint & Format (Biome)
+        run: npx @biomejs/biome ci .
+
+      - name: Type Check (TSC)
+        run: npx tsc --noEmit
+
+      # TODO: add tests here:
+      # - name: Run Tests
+      #   run: npm test
+
+  # TODO: add deploy step here
+  # deploy:
+    # name: Deploy to AWS
