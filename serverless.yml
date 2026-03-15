@@ -1,0 +1,69 @@
+service: cloakery
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  region: us-west-1
+  stage: ${opt:stage, 'dev'}
+  architecture: arm64 # Faster and cheaper than x86_64
+  memorySize: 1024
+  timeout: 30
+  logRetentionInDays: 7
+  httpApi:
+    cors: true
+
+build:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: true
+    exclude: ['@aws-sdk/*'] # AWS SDK is pre-installed in the Lambda runtime
+    target: node24
+    platform: node
+
+plugins:
+  - serverless-iam-roles-per-function
+
+functions:
+  # Passkey Authentication - Registration
+  registerOptions:
+    handler: src/auth/register.options
+    events:
+      - httpApi:
+          path: /auth/register/options
+          method: post
+  registerVerify:
+    handler: src/auth/register.verify
+    events:
+      - httpApi:
+          path: /auth/register/verify
+          method: post
+
+  # Passkey Authentication - Login
+  loginOptions:
+    handler: src/auth/login.options
+    events:
+      - httpApi:
+          path: /auth/login/options
+          method: post
+  loginVerify:
+    handler: src/auth/login.verify
+    events:
+      - httpApi:
+          path: /auth/login/verify
+          method: post
+
+  # Inbound Email Pipeline
+  inboundProcessor:
+    handler: src/email/inbound.handler
+    # SES triggers will be added here
+
+  # Outbound Email Pipeline
+  outboundProcessor:
+    handler: src/email/outbound.handler
+    # SES triggers will be added here
+
+resources:
+  # Infrastructure (Aurora, DynamoDB, S3) will be defined here in subsequent steps
+  Resources: {}
+
