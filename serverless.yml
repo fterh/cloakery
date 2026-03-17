@@ -25,6 +25,14 @@ plugins:
   - serverless-iam-roles-per-function
 
 functions:
+  # Proof of Life
+  test:
+    handler: src/test/index.handler
+    events:
+      - httpApi:
+          path: /test
+          method: get
+
   # Passkey Authentication - Registration
   registerOptions:
     handler: src/auth/register.options
