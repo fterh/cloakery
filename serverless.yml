@@ -28,6 +28,8 @@ functions:
   # Proof of Life
   test:
     handler: src/test/index.handler
+    environment:
+      STAGE: ${opt:stage, 'dev'}
     events:
       - httpApi:
           path: /test

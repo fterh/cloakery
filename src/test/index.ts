@@ -11,6 +11,6 @@ export const handler = async (
     headers: {
       "Content-Type": "text/plain",
     },
-    body: "ok",
+    body: `ok (stage: ${process.env.STAGE})`,
   };
 };
