@@ -59,6 +59,8 @@ jobs:
     uses: ./.github/workflows/reusable-deploy.yml
     with:
       stage: dev
+      domain: ${{ vars.DOMAIN_DEV }}
+      domain_certificate_arn: ${{ vars.DOMAIN_DEV_CERTIFICATE_ARN }}
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
@@ -73,6 +75,8 @@ jobs:
     uses: ./.github/workflows/reusable-deploy.yml
     with:
       stage: prod
+      domain: ${{ vars.DOMAIN_PROD }}
+      domain_certificate_arn: ${{ vars.DOMAIN_PROD_CERTIFICATE_ARN }}
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
