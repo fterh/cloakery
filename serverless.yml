@@ -4,6 +4,10 @@ provider:
   name: aws
   runtime: nodejs24.x
   region: us-west-1
+  domain:
+    name: ${param:domain}
+    certificateArn: ${param:domain_certificate_arn}
+    createRoute53Record: false
   stage: ${opt:stage, 'dev'}
   architecture: arm64 # Faster and cheaper than x86_64
   memorySize: 1024
