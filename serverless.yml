@@ -78,6 +78,98 @@ functions:
     # SES triggers will be added here
 
 resources:
-  # Infrastructure (Aurora, DynamoDB, S3) will be defined here in subsequent steps
-  Resources: {}
+  Resources:
+    StaticSiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-${opt:stage, 'dev'}-static-site
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    StaticSiteDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+            - Id: S3Origin
+              DomainName: !GetAtt StaticSiteBucket.RegionalDomainName
+              S3OriginConfig:
+                OriginAccessIdentity: ""
+              OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+            - Id: ApiOrigin
+              DomainName: !Sub "${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+          Enabled: true
+          DefaultRootObject: index.html
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD, OPTIONS]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          CacheBehaviors:
+            # Route /test to API Gateway
+            - PathPattern: /test
+              TargetOriginId: ApiOrigin
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+              # Use Managed Policies
+              CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
+              OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3 # AllViewer
+            # Route /auth/* to API Gateway
+            - PathPattern: /auth/*
+              TargetOriginId: ApiOrigin
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+              # Use Managed Policies
+              CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
+              OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3 # AllViewer
+          CustomErrorResponses:
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+          Aliases:
+            - ${param:domain}
+          ViewerCertificate:
+            AcmCertificateArn: ${param:domain_certificate_arn}
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+
+    CloudFrontOriginAccessControl:
+      Type: AWS::CloudFront::OriginAccessControl
+      Properties:
+        OriginAccessControlConfig:
+          Name: ${self:service}-${opt:stage, 'dev'}-oac
+          OriginAccessControlOriginType: s3
+          SigningBehavior: always
+          SigningProtocol: sigv4
+
+    StaticSiteBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref StaticSiteBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Action: s3:GetObject
+              Effect: Allow
+              Resource: !Sub ${StaticSiteBucket.Arn}/*
+              Principal:
+                Service: cloudfront.amazonaws.com
+              Condition:
+                StringEquals:
+                  AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${StaticSiteDistribution}
+
+  Outputs:
+    StaticSiteBucketName:
+      Value: !Ref StaticSiteBucket
+    CloudFrontDistributionId:
+      Value: !Ref StaticSiteDistribution
 
