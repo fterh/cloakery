@@ -61,6 +61,9 @@ jobs:
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
           echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
 
+      - name: Run Tailwind
+        run: npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css
+
       - name: Deploy Static Site
         run: |
           aws s3 sync ./public s3://${{ steps.query_outputs.outputs.bucket_name }} --delete
