@@ -45,6 +45,29 @@ jobs:
           aws-region: us-west-1
 
       - name: Serverless Deploy
+        id: deploy
         run: npx serverless deploy --stage ${{ inputs.stage }} --param="domain=${{ inputs.domain }}" --param="domain_certificate_arn=${{ inputs.domain_certificate_arn }}"
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+      - name: Query Outputs
+        id: query_outputs
+        run: |
+          # Use AWS CLI to query outputs from the CloudFormation stack
+          STACK_NAME=cloakery-${{ inputs.stage }}
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='StaticSiteBucketName'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+          
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+
+      - name: Run Tailwind
+        run: npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css
+
+      - name: Deploy Static Site
+        run: |
+          aws s3 sync ./public s3://${{ steps.query_outputs.outputs.bucket_name }} --delete
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ steps.query_outputs.outputs.distribution_id }} --paths "/*"

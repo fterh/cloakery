@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloakery | Email Privacy Service</title>
+    <meta name="description" content="Cloakery offers seamless email aliasing and forwarding to protect your real identity. Coming soon to cloakery.io.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="output.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-hidden font-sans selection:bg-brand-500 selection:text-white">
+
+    <!-- Background Ambient Glows -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-0 -left-4 w-72 h-72 bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
+        <div class="absolute top-0 -right-4 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Navigation -->
+    <header class="w-full max-w-6xl mx-auto px-6 py-6 flex justify-center items-center z-10">
+        <span class="text-2xl font-bold tracking-tight text-white">Cloakery</span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center px-6 relative z-10 w-full max-w-4xl mx-auto text-center">
+        
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 text-sm font-medium text-brand-400 mb-8 backdrop-blur-sm">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+            </span>
+            Under Development
+        </div>
+
+        <!-- Hero Text -->
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-slate-400 mb-6 drop-shadow-sm leading-tight pb-2">
+            Your inbox, <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-indigo-400">cloaked.</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Protect your email address from spam, marketing, and data breaches.
+            Cloakery provides privacy-first seamless email aliasing and forwarding to hide your real email address.
+        </p>
+
+    </main>
+</body>
+</html>
