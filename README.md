@@ -8,6 +8,7 @@ privacy-first email relay service
 Assuming that your domain was not registered and configured through AWS, there are some manual steps:
 
 1. Use AWS Certificate Manager to request and configure SSL certificates for `domain.tld` and `*.domain.tld`, follow the steps.
+This must be in `us-east-1` region to play nice with Cloudfront.
 2. Copy the certificate ARNs.
 3. Paste the ARNs into your GitHub repository variables (see below). I recommend `domain.tld` for prod and `*.domain.tld` for dev (e.g. `dev.domain.tld`).
 
@@ -20,8 +21,8 @@ The following GitHub variables and secrets must be provisioned:
 #### Variables
 - `DOMAIN_DEV`
 - `DOMAIN_PROD`
-- `DOMAIN_DEV_CERTIFICATE_ARN`
-- `DOMAIN_PROD_CERTIFICATE_ARN`
+- `DOMAIN_DEV_CERTIFICATE_ARN` (must be `us-east-1`)
+- `DOMAIN_PROD_CERTIFICATE_ARN` (must be `us-east-1`)
 
 ### Secrets
 

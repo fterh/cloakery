@@ -25,9 +25,6 @@ build:
     target: node24
     platform: node
 
-plugins:
-  - serverless-iam-roles-per-function
-
 functions:
   # Proof of Life
   test:
