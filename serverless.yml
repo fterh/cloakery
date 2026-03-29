@@ -15,6 +15,19 @@ provider:
   logRetentionInDays: 7
   httpApi:
     cors: true
+  environment:
+    TABLE_NAME: !Ref CloakeryKV
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:DeleteItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource: !GetAtt CloakeryKV.Arn
 
 build:
   esbuild:
@@ -76,6 +89,21 @@ functions:
 
 resources:
   Resources:
+    CloakeryKV:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider:stage}-kv
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TimeToLiveSpecification:
+          AttributeName: expires_at
+          Enabled: true
+
     StaticSiteBucket:
       Type: AWS::S3::Bucket
       Properties:
