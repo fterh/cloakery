@@ -25,5 +25,9 @@
     "serverless": "^4.33.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1019.0",
+    "@aws-sdk/lib-dynamodb": "^3.1019.0"
   }
 }
