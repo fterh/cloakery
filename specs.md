@@ -20,17 +20,16 @@ The infrastructure is entirely AWS-native, utilizing serverless components to en
 
 * **Frontend:** Amazon S3 \+ Amazon CloudFront (Static SPA hosting)  
 * **Backend API:** Amazon API Gateway \+ AWS Lambda (RESTful endpoints)  
-* **Relational Database:** Amazon Aurora Serverless v2 (PostgreSQL)  
-* **Key-Value Store:** Amazon DynamoDB (Ephemeral data and fast-access settings)  
-* **Inbound Email Pipeline:** Amazon Simple Email Service (SES) Inbound Routing \-\> AWS Lambda  
-* **Outbound Email Pipeline:** AWS Lambda \-\> Amazon SES Outbound
+* **Relational Database:** Amazon RDS (PostgreSQL)
+* **Key-Value Store:** Amazon DynamoDB (Ephemeral data and fast-access settings)
+* **Inbound Email Pipeline:** Amazon SES Inbound Routing -> AWS Lambda
+* **Outbound Email Pipeline:** AWS Lambda -> Amazon SES Outbound
 
 ## **3\. Data Model**
 
-The primary relational data is housed in Amazon Aurora (PostgreSQL), while transient and configuration data is managed in Amazon DynamoDB.
+The primary relational data is housed in Amazon RDS (PostgreSQL), while transient and configuration data is managed in Amazon DynamoDB.
 
-### **3.1 Relational Schema (Amazon Aurora)**
-
+### **3.1 Relational Schema (Amazon RDS)**
 **Table: users**
 
 | Column | Type | Constraints | Description |
@@ -78,7 +77,7 @@ Cloakery relies exclusively on WebAuthn (Passkeys) via the @simplewebauthn libra
 1. **Initiate:** User submits a desired username and their email address via the client.  
 2. **Challenge:** Lambda backend generates a WebAuthn registration challenge and caches it in DynamoDB with a 5-minute TTL.  
 3. **Prompt:** Client-side application invokes the browser's WebAuthn API (FaceID, TouchID, YubiKey, etc.).  
-4. **Verify & Persist:** Lambda cryptographically verifies the signature, provisions the user record in Aurora, and stores the public key.  
+4. **Verify & Persist:** Lambda cryptographically verifies the signature, provisions the user record in RDS, and stores the public key.
 5. **Session:** A JSON Web Token (JWT) is issued and set as an HttpOnly, Secure cookie.
 
 ### **4.2 Login Flow**
@@ -94,7 +93,7 @@ Cloakery relies exclusively on WebAuthn (Passkeys) via the @simplewebauthn libra
 
 1. **Trigger:** External sender transmits an email to `alias@username.cloakery.io`. 
 2. **Ingestion:** SES Inbound Rule triggers the Inbound Lambda Processor.  
-3. **Validation:** Lambda queries Aurora to ensure the alias exists, belongs to the specified username, and is\_active \== TRUE.  
+3. **Validation:** Lambda queries RDS to ensure the alias exists, belongs to the specified username, and is\_active \== TRUE.
 4. **Transformation:**  
    * Sender's email address is encoded.  
    * The Reply-To header is mutated to: `{alias}+{encoded_sender_email}@{username}.cloakery.io`.  
@@ -128,8 +127,8 @@ Cloakery relies exclusively on WebAuthn (Passkeys) via the @simplewebauthn libra
    * Establish OIDC trust between GitHub and AWS.  
 3. **Phase 3: Passkey Authentication Logic**  
    * Implement Registration/Login endpoints and JWT cookie management.  
-4. **Phase 4: Dashboard & Alias Management**  
-   * Build S3/CloudFront SPA frontend and Aurora CRUD APIs.  
+4. **Phase 4: Dashboard & Alias Management**
+   * Build S3/CloudFront SPA frontend and RDS CRUD APIs.
 5. **Phase 5: Inbound Email Pipeline**  
    * Develop Lambda encoding logic, SES forwarding, and fallback attachment error-handling.  
 6. **Phase 6: Outbound Email Pipeline**  
