@@ -37,8 +37,9 @@ The primary relational data is housed in Amazon Aurora (PostgreSQL), while trans
 | :--- | :--- | :--- | :--- |
 | id | UUID | PRIMARY KEY | Unique identifier for the user. |
 | username | VARCHAR(50) | UNIQUE, NOT NULL | Public handle used in the email sub-domain. |
-| real\_email | VARCHAR(255) | UNIQUE, NOT NULL | The user's actual verified email address. |
+| email | VARCHAR(255) | UNIQUE, NOT NULL | The user's actual  email address. |
 | created\_at | TIMESTAMP | NOT NULL | System timestamp of account creation. |
+| updated\_at | TIMESTAMP | NOT NULL | System timestamp of account update. |
 
 **Table: passkeys**
 

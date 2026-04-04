@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1019.0",
-    "@aws-sdk/lib-dynamodb": "^3.1019.0"
+    "@aws-sdk/lib-dynamodb": "^3.1019.0",
+    "@simplewebauthn/server": "^13.3.0"
   }
 }
