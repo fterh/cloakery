@@ -22,6 +22,7 @@
     "@tailwindcss/cli": "^4.2.2",
     "@types/aws-lambda": "^8.10.161",
     "@types/node": "^25.5.0",
+    "@types/pg": "^8.20.0",
     "serverless": "^4.33.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"
@@ -29,6 +30,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1019.0",
     "@aws-sdk/lib-dynamodb": "^3.1019.0",
-    "@simplewebauthn/server": "^13.3.0"
+    "@simplewebauthn/server": "^13.3.0",
+    "kysely": "^0.28.15",
+    "pg": "^8.20.0"
   }
 }

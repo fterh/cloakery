@@ -4,6 +4,7 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
+import { userExists } from "../lib/db.js";
 import { kv } from "../lib/kv.js";
 
 const AUTH_CHALLENGE_TTL = 300; // 5-minute TTL
@@ -21,6 +22,14 @@ export const options = async (
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "email and username are required" }),
+      };
+    }
+
+    // Check if user already exists
+    if (await userExists(email, username)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "email or username already taken" }),
       };
     }
 
