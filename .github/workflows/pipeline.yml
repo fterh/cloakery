@@ -64,6 +64,8 @@ jobs:
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD_DEV }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET_DEV }}
 
   deploy-prod:
     name: Deploy to Production
@@ -80,3 +82,5 @@ jobs:
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD_PROD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET_PROD }}

@@ -28,3 +28,27 @@ The following GitHub variables and secrets must be provisioned:
 
 - `AWS_ROLE_ARN` (GitHub Actions will use this to exchange short-lived AWS credentials for automatic deploys)
 - `SERVERLESS_ACCESS_KEY` (Serverless framework require authentication when running in GitHub Actions)
+- `DB_PASSWORD_DEV` (Database password for the `dev` environment)
+- `DB_PASSWORD_PROD` (Database password for the `prod` environment)
+- `JWT_SECRET_DEV` (JWT Secret for the `dev` environment)
+- `JWT_SECRET_PROD` (JWT Secret for the `prod` environment)
+
+#### Generating a Database Password
+
+The `DB_PASSWORD_*` secrets are passed directly to Amazon RDS to create the master user for the Aurora PostgreSQL instance. AWS RDS enforces specific constraints, and because the password is used in a connection string URI, it should avoid characters that require URL encoding (like `@`, `/`, `#`, `?`, etc.).
+
+You can use the following bash command to generate a secure, 32-character RDS-compliant password containing only alphanumeric characters and safe symbols (`-` and `_`):
+
+```bash
+# Generates a 32-character random string using a-z, A-Z, 0-9, -, and _
+LC_ALL=C tr -dc 'a-zA-Z0-9-_' < /dev/urandom | fold -w 32 | head -n 1
+```
+
+#### Generating a JWT Secret
+
+For the `JWT_SECRET_*` variables, it is recommended to use a cryptographically secure random string with at least 256 bits of entropy. You can easily generate one using `openssl`:
+
+```bash
+# Generates a 256-bit secret encoded as a 64-character hex string
+openssl rand -hex 32
+```
