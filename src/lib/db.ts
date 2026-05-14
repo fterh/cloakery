@@ -55,3 +55,38 @@ export const userExists = async (
     .executeTakeFirst();
   return !!user;
 };
+
+export const createUserWithPasskey = async (params: {
+  userId: string;
+  email: string;
+  username: string;
+  passkey: {
+    id: string;
+    publicKey: Buffer;
+    counter: number;
+  };
+}) => {
+  await db.transaction().execute(async (trx) => {
+    await trx
+      .insertInto("users")
+      .values({
+        id: params.userId,
+        email: params.email,
+        username: params.username,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .execute();
+
+    await trx
+      .insertInto("passkeys")
+      .values({
+        id: params.passkey.id,
+        user_id: params.userId,
+        public_key: params.passkey.publicKey,
+        counter: params.passkey.counter,
+        created_at: new Date(),
+      })
+      .execute();
+  });
+};

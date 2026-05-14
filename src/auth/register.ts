@@ -1,15 +1,24 @@
 import { randomUUID } from "node:crypto";
-import { generateRegistrationOptions } from "@simplewebauthn/server";
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from "@simplewebauthn/server";
 import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
-import { userExists } from "../lib/db.js";
+import { createUserWithPasskey, userExists } from "../lib/db.js";
 import { kv } from "../lib/kv.js";
 
 const AUTH_CHALLENGE_TTL = 300; // 5-minute TTL
-const RP_ID = "cloakery.io";
-const RP_NAME = "Cloakery";
+const RP_ID = process.env.RP_ID;
+const RP_NAME = process.env.RP_NAME;
+
+if (!RP_ID || !RP_NAME) {
+  throw new Error("Missing RP_ID or RP_NAME environment variables");
+}
+
+const ORIGIN = `https://${RP_ID}`;
 
 export const options = async (
   event: APIGatewayProxyEventV2,
@@ -72,10 +81,72 @@ export const options = async (
 };
 
 export const verify = async (
-  _event: APIGatewayProxyEventV2,
+  event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: "registration verify ok" }),
-  };
+  try {
+    const body = event.body ? JSON.parse(event.body) : {};
+    const { email, response } = body;
+
+    if (!email || !response) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "email and response are required" }),
+      };
+    }
+
+    const challengeKey = `AUTH_CHALLENGE#${email}`;
+    const stored = await kv.get<{
+      challenge: string;
+      userId: string;
+      email: string;
+      username: string;
+    }>(challengeKey);
+
+    if (!stored) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "challenge not found or expired" }),
+      };
+    }
+
+    const verification = await verifyRegistrationResponse({
+      response,
+      expectedChallenge: stored.challenge,
+      expectedOrigin: ORIGIN,
+      expectedRPID: RP_ID,
+    });
+
+    if (verification.verified && verification.registrationInfo) {
+      const { credential } = verification.registrationInfo;
+
+      await createUserWithPasskey({
+        userId: stored.userId,
+        email: stored.email,
+        username: stored.username,
+        passkey: {
+          id: Buffer.from(credential.id).toString("base64url"),
+          publicKey: Buffer.from(credential.publicKey),
+          counter: credential.counter,
+        },
+      });
+
+      await kv.delete(challengeKey);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: true }),
+      };
+    }
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "verification failed" }),
+    };
+  } catch (error) {
+    console.error("Error verifying registration:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "internal server error" }),
+    };
+  }
 };
