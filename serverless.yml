@@ -61,7 +61,7 @@ build:
 functions:
   # Proof of Life
   test:
-    handler: src/test/index.handler
+    handler: src/backend/src/test/index.handler
     environment:
       STAGE: ${sls:stage}
     events:
@@ -70,17 +70,17 @@ functions:
           method: get
 
   migrate:
-    handler: src/lib/migrate.handler
+    handler: src/backend/src/lib/migrate.handler
 
   # Passkey Authentication - Registration
   registerOptions:
-    handler: src/auth/register.options
+    handler: src/backend/src/auth/register.options
     events:
       - httpApi:
           path: /auth/register/options
           method: post
   registerVerify:
-    handler: src/auth/register.verify
+    handler: src/backend/src/auth/register.verify
     events:
       - httpApi:
           path: /auth/register/verify
@@ -88,26 +88,26 @@ functions:
 
   # Passkey Authentication - Login
   loginOptions:
-    handler: src/auth/login.options
+    handler: src/backend/src/auth/login.options
     events:
       - httpApi:
-          path: /auth/login/options
+          path: /auth/register/login/options
           method: post
   loginVerify:
-    handler: src/auth/login.verify
+    handler: src/backend/src/auth/login.verify
     events:
       - httpApi:
-          path: /auth/login/verify
+          path: /auth/register/login/verify
           method: post
 
   # Inbound Email Pipeline
   inboundProcessor:
-    handler: src/email/inbound.handler
+    handler: src/backend/src/email/inbound.handler
     # SES triggers will be added here
 
   # Outbound Email Pipeline
   outboundProcessor:
-    handler: src/email/outbound.handler
+    handler: src/backend/src/email/outbound.handler
     # SES triggers will be added here
 
 resources:

@@ -15,9 +15,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "biome ci && tsc --noEmit && tsc --project frontend/tsconfig.json --noEmit && vitest run",
-    "dev:web": "vite frontend",
-    "build:web": "vite build frontend"
+    "test": "biome ci && tsc --project src/backend/tsconfig.json --noEmit && tsc --project src/frontend/tsconfig.json --noEmit && vitest run",
+    "dev:web": "vite src/frontend",
+    "build:web": "vite build src/frontend"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
