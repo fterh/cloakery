@@ -31,8 +31,16 @@ export const Login = () => {
       });
 
       if (!respOptions.ok) {
-        const error = await respOptions.json();
-        throw new Error(error.error || "Failed to fetch options");
+        const text = await respOptions.text();
+        console.error("Options error response:", text);
+        try {
+          const error = JSON.parse(text);
+          throw new Error(error.error || "Failed to fetch options");
+        } catch {
+          throw new Error(
+            `Server returned error (${respOptions.status}): ${text.slice(0, 100)}`,
+          );
+        }
       }
 
       const options = await respOptions.json();

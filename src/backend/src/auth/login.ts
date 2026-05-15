@@ -48,7 +48,7 @@ export const options = async (
     const authOptions = await generateAuthenticationOptions({
       rpID: RP_ID,
       allowCredentials: user.passkeys.map((pk) => ({
-        id: pk.id,
+        id: pk.id, // String (base64url)
         type: "public-key",
       })),
       userVerification: "preferred",

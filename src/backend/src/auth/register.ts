@@ -48,9 +48,7 @@ export const options = async (
     const registrationOptions = await generateRegistrationOptions({
       rpName: RP_NAME,
       rpID: RP_ID,
-      userID: Buffer.from(userId),
-      userName: email,
-      userDisplayName: username,
+      userName: username,
       authenticatorSelection: {
         residentKey: "preferred",
         userVerification: "preferred",
@@ -125,7 +123,7 @@ export const verify = async (
         email: stored.email,
         username: stored.username,
         passkey: {
-          id: Buffer.from(credential.id).toString("base64url"),
+          id: credential.id, // String (base64url)
           publicKey: Buffer.from(credential.publicKey),
           counter: credential.counter,
         },
