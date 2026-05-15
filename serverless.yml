@@ -91,13 +91,13 @@ functions:
     handler: src/backend/src/auth/login.options
     events:
       - httpApi:
-          path: /auth/register/login/options
+          path: /auth/login/options
           method: post
   loginVerify:
     handler: src/backend/src/auth/login.verify
     events:
       - httpApi:
-          path: /auth/register/login/verify
+          path: /auth/login/verify
           method: post
 
   # Inbound Email Pipeline
