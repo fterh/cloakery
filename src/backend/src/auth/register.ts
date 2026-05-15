@@ -9,6 +9,7 @@ import type {
 } from "aws-lambda";
 import { createUserWithPasskey, userExists } from "../lib/db.js";
 import { kv } from "../lib/kv.js";
+import { makeJWT, makeJWTCookie } from "../lib/session.js";
 
 const AUTH_CHALLENGE_TTL = 300; // 5-minute TTL
 const RP_ID = process.env.RP_ID;
@@ -132,8 +133,12 @@ export const verify = async (
 
       await kv.delete(challengeKey);
 
+      const token = makeJWT(stored.userId);
+      const cookie = makeJWTCookie(token);
+
       return {
         statusCode: 200,
+        cookies: [cookie],
         body: JSON.stringify({ success: true }),
       };
     }
