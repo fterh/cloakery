@@ -9,24 +9,34 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const isRegister = location.pathname === "/register";
+  const isLogin = location.pathname === "/login";
+  const isAuthPage = isRegister || isLogin;
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden font-sans selection:bg-blue-500 selection:text-white bg-slate-900 text-slate-100">
       <Glows />
 
       <header
-        className={`w-full max-w-6xl mx-auto px-6 py-6 flex ${isRegister ? "justify-center" : "justify-between"} items-center z-10`}
+        className={`w-full max-w-6xl mx-auto px-6 py-6 flex ${isAuthPage ? "justify-center" : "justify-between"} items-center z-10`}
       >
         <Link to="/" className="text-2xl font-bold tracking-tight text-white">
           Cloakery
         </Link>
-        {!isRegister && (
-          <Link
-            to="/register"
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-          >
-            Register
-          </Link>
+        {!isAuthPage && (
+          <div className="flex gap-4">
+            <Link
+              to="/login"
+              className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+            >
+              Register
+            </Link>
+          </div>
         )}
       </header>
 
