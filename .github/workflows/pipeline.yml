@@ -23,13 +23,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Lint & Format (Biome)
-        run: npx @biomejs/biome ci .
-
-      - name: Type Check (TSC)
-        run: npx tsc --noEmit
-
-      - name: Run Tests (Vitest)
+      - name: Lint & format (Biome), type check (TSC), and run tests (Vitest)
         env:
           RP_ID: localhost
           RP_NAME: Cloakery

@@ -15,7 +15,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run"
+    "test": "biome ci && tsc --noEmit && vitest run"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
