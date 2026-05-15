@@ -1,26 +1,17 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import { Landing } from "./pages/Landing";
+import { Register } from "./pages/Register";
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div className="p-8 text-white">
-              <h1>Landing Page Placeholder</h1>
-            </div>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <div className="p-8 text-white">
-              <h1>Registration Page Placeholder</h1>
-            </div>
-          }
-        />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </Layout>
     </Router>
   );
 }
