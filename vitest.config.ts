@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["src/backend/src/**/*.test.ts"],
     env: {
       TABLE_NAME: "test-table",
       DATABASE_URL: "postgres://user:pass@localhost:5432/db",

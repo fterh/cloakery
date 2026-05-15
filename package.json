@@ -15,24 +15,35 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "biome ci && tsc --noEmit && vitest run"
+    "test": "biome ci && tsc --project src/backend/tsconfig.json --noEmit && tsc --project src/frontend/tsconfig.json --noEmit && vitest run",
+    "dev:web": "vite src/frontend",
+    "build:web": "vite build src/frontend"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
     "@tailwindcss/cli": "^4.2.2",
+    "@tailwindcss/vite": "^4.3.0",
     "@types/aws-lambda": "^8.10.161",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
     "serverless": "^4.33.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
+    "vite": "^8.0.13",
     "vitest": "^4.1.6"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1019.0",
     "@aws-sdk/lib-dynamodb": "^3.1019.0",
+    "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.0",
     "kysely": "^0.28.15",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1"
   }
 }

@@ -110,6 +110,9 @@ dist
 # Serverless directories
 .serverless/
 
+# Vite build output
+public/
+
 # FuseBox cache
 .fusebox/
 
