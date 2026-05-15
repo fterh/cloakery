@@ -75,8 +75,8 @@ jobs:
           echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
           echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
 
-      - name: Run Tailwind
-        run: npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css
+      - name: Build SPA
+        run: npm run build:web
 
       - name: Deploy Static Site
         run: |
