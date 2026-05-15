@@ -54,6 +54,9 @@ build:
     exclude: ['@aws-sdk/*'] # AWS SDK is pre-installed in the Lambda runtime
     target: node24
     platform: node
+    format: esm
+    banner:
+      js: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);"
 
 functions:
   # Proof of Life
@@ -65,6 +68,9 @@ functions:
       - httpApi:
           path: /test
           method: get
+
+  migrate:
+    handler: src/lib/migrate.handler
 
   # Passkey Authentication - Registration
   registerOptions:

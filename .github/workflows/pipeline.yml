@@ -23,15 +23,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Lint & Format (Biome)
-        run: npx @biomejs/biome ci .
-
-      - name: Type Check (TSC)
-        run: npx tsc --noEmit
-
-      # TODO: add tests here:
-      # - name: Run Tests
-      #   run: npm test
+      - name: Lint & format (Biome), type check (TSC), and run tests (Vitest)
+        env:
+          RP_ID: localhost
+          RP_NAME: Cloakery
+        run: npm test
 
   validate-cd:
     name: Validate CD (OIDC Trust)
