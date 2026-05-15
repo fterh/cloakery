@@ -36,30 +36,32 @@ The primary relational data is housed in Amazon RDS (PostgreSQL), while transien
 | :--- | :--- | :--- | :--- |
 | id | UUID | PRIMARY KEY | Unique identifier for the user. |
 | username | VARCHAR(50) | UNIQUE, NOT NULL | Public handle used in the email sub-domain. |
-| email | VARCHAR(255) | UNIQUE, NOT NULL | The user's actual  email address. |
-| created\_at | TIMESTAMP | NOT NULL | System timestamp of account creation. |
-| updated\_at | TIMESTAMP | NOT NULL | System timestamp of account update. |
+| email | VARCHAR(255) | UNIQUE, NOT NULL | The user's actual email address. |
+| created\_at | TIMESTAMPTZ | NOT NULL | System timestamp of account creation. |
+| updated\_at | TIMESTAMPTZ | NOT NULL | System timestamp of account update (auto-updated via trigger). |
 
 **Table: passkeys**
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | id | VARCHAR | PRIMARY KEY | The WebAuthn credential ID. |
-| user\_id | UUID | FOREIGN KEY, INDEX | Reference to users.id. |
+| user\_id | UUID | FOREIGN KEY (CASCADE), INDEX | Reference to users.id. |
 | public\_key | BYTEA | NOT NULL | Stored public key for assertion. |
 | counter | BIGINT | NOT NULL | Signature counter for replay attack prevention. |
+| created\_at | TIMESTAMPTZ | NOT NULL | System timestamp of passkey creation. |
 
 **Table: aliases**
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | id | UUID | PRIMARY KEY | Unique identifier for the alias. |
-| user\_id | UUID | FOREIGN KEY, NOT NULL | Reference to users.id. |
+| user\_id | UUID | FOREIGN KEY (CASCADE), NOT NULL | Reference to users.id. |
 | alias | VARCHAR(255) | NOT NULL | The local-part prefix (e.g., shopping). |
 | is\_active | BOOLEAN | DEFAULT TRUE | Toggle to pause/resume forwarding. |
-| created\_at | TIMESTAMP | NOT NULL | System timestamp of alias creation. |
+| created\_at | TIMESTAMPTZ | NOT NULL | System timestamp of alias creation. |
 
-*Constraint Note: A composite UNIQUE(user\_id, alias) constraint enforces that a user cannot create duplicate aliases, though different users may share the same alias prefix (e.g., info@userA.cloakery.io and info@userB.cloakery.io).*
+*Constraint Note: A composite UNIQUE(user\_id, alias) constraint enforces that a user cannot create duplicate aliases. All foreign keys use ON DELETE CASCADE to ensure data integrity during user deletion.*
+
 
 ### **3.2 Ephemeral & Settings Schema (Amazon DynamoDB)**
 

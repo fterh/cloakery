@@ -66,6 +66,9 @@ functions:
           path: /test
           method: get
 
+  migrate:
+    handler: src/lib/migrate.handler
+
   # Passkey Authentication - Registration
   registerOptions:
     handler: src/auth/register.options
