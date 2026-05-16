@@ -50,7 +50,7 @@ jobs:
 
       - name: Serverless Deploy
         id: deploy
-        run: npx serverless deploy --debug --stage ${{ inputs.stage }} --param="domain=${{ inputs.domain }}" --param="domain_certificate_arn=${{ inputs.domain_certificate_arn }}" --param="db_password=${{ secrets.DB_PASSWORD }}" --param="jwt_secret=${{ secrets.JWT_SECRET }}"
+        run: npx serverless deploy --stage ${{ inputs.stage }} --param="domain=${{ inputs.domain }}" --param="domain_certificate_arn=${{ inputs.domain_certificate_arn }}" --param="db_password=${{ secrets.DB_PASSWORD }}" --param="jwt_secret=${{ secrets.JWT_SECRET }}"
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
