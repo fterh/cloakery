@@ -91,13 +91,13 @@ functions:
     handler: src/backend/src/auth/login.options
     events:
       - httpApi:
-          path: /auth/register/login/options
+          path: /auth/login/options
           method: post
   loginVerify:
     handler: src/backend/src/auth/login.verify
     events:
       - httpApi:
-          path: /auth/register/login/verify
+          path: /auth/login/verify
           method: post
 
   # Inbound Email Pipeline
@@ -330,6 +330,9 @@ resources:
               QueryString: false
               Cookies:
                 Forward: none
+            FunctionAssociations:
+              - EventType: viewer-request
+                FunctionARN: !GetAtt CloudFrontURLRewriteFunction.FunctionARN
           CacheBehaviors:
             # Route /test to API Gateway
             - PathPattern: /test
@@ -347,19 +350,34 @@ resources:
               # Use Managed Policies
               CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
               OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3 # AllViewer
-          CustomErrorResponses:
-            - ErrorCode: 404
-              ResponseCode: 200
-              ResponsePagePath: /index.html
-            - ErrorCode: 403
-              ResponseCode: 200
-              ResponsePagePath: /index.html
           Aliases:
             - ${param:domain}
           ViewerCertificate:
             AcmCertificateArn: ${param:domain_certificate_arn}
             SslSupportMethod: sni-only
             MinimumProtocolVersion: TLSv1.2_2021
+
+    CloudFrontURLRewriteFunction:
+      Type: AWS::CloudFront::Function
+      Properties:
+        Name: ${self:service}-${sls:stage}-spa-rewrite
+        AutoPublish: true
+        FunctionCode: |
+          function handler(event) {
+            var request = event.request;
+            var uri = request.uri;
+
+            // If the URI doesn't contain a dot, it's a React route.
+            // We rewrite it to index.html so S3 can serve the SPA.
+            if (!uri.includes('.')) {
+              request.uri = '/index.html';
+            }
+
+            return request;
+          }
+        FunctionConfig:
+          Comment: Generic SPA URL rewriter (handles deep links)
+          Runtime: cloudfront-js-1.0
 
     CloudFrontOriginAccessControl:
       Type: AWS::CloudFront::OriginAccessControl
