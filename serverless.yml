@@ -39,12 +39,13 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:Query
           Resource: !GetAtt CloakeryKV.Arn
-  vpc:
+
+custom:
+  vpcConfig: &vpcConfig
     securityGroupIds:
       - !Ref LambdaSecurityGroup
     subnetIds:
-      - !Ref PrivateSubnetA
-      - !Ref PrivateSubnetB
+      - !Ref PrivateSubnetA # Single AZ for cost optimization
 
 build:
   esbuild:
@@ -71,16 +72,19 @@ functions:
 
   migrate:
     handler: src/backend/src/lib/migrate.handler
+    vpc: *vpcConfig
 
   # Passkey Authentication - Registration
   registerOptions:
     handler: src/backend/src/auth/register.options
+    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/register/options
           method: post
   registerVerify:
     handler: src/backend/src/auth/register.verify
+    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/register/verify
@@ -89,12 +93,14 @@ functions:
   # Passkey Authentication - Login
   loginOptions:
     handler: src/backend/src/auth/login.options
+    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/login/options
           method: post
   loginVerify:
     handler: src/backend/src/auth/login.verify
+    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/login/verify
@@ -103,6 +109,7 @@ functions:
   # Session Initialization
   me:
     handler: src/backend/src/auth/session.me
+    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/me
@@ -138,36 +145,6 @@ resources:
         Tags:
           - Key: Name
             Value: ${self:service}-${sls:stage}-vpc
-
-    InternetGateway:
-      Type: AWS::EC2::InternetGateway
-      Properties:
-        Tags:
-          - Key: Name
-            Value: ${self:service}-${sls:stage}-igw
-
-    VPCGatewayAttachment:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-        VpcId: !Ref VPC
-        InternetGatewayId: !Ref InternetGateway
-
-    # Public Subnets (for NAT Gateway)
-    PublicSubnetA:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: !Ref VPC
-        CidrBlock: 10.0.1.0/24
-        AvailabilityZone: ${self:provider.region}a
-        MapPublicIpOnLaunch: true
-
-    PublicSubnetB:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: !Ref VPC
-        CidrBlock: 10.0.2.0/24
-        AvailabilityZone: ${self:provider.region}b
-        MapPublicIpOnLaunch: true
 
     # Private Subnets (for RDS and Lambda)
     PrivateSubnetA:
@@ -212,7 +189,6 @@ resources:
         PrivateDnsEnabled: true
         SubnetIds:
           - !Ref PrivateSubnetA
-          - !Ref PrivateSubnetB
         SecurityGroupIds:
           - !Ref SESEndpointSecurityGroup
 
@@ -228,30 +204,6 @@ resources:
             SourceSecurityGroupId: !Ref LambdaSecurityGroup
 
     # Route Tables
-    PublicRouteTable:
-      Type: AWS::EC2::RouteTable
-      Properties:
-        VpcId: !Ref VPC
-
-    PublicRoute:
-      Type: AWS::EC2::Route
-      Properties:
-        RouteTableId: !Ref PublicRouteTable
-        DestinationCidrBlock: 0.0.0.0/0
-        GatewayId: !Ref InternetGateway
-
-    PublicSubnetARouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        SubnetId: !Ref PublicSubnetA
-        RouteTableId: !Ref PublicRouteTable
-
-    PublicSubnetBRouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        SubnetId: !Ref PublicSubnetB
-        RouteTableId: !Ref PublicRouteTable
-
     PrivateRouteTable:
       Type: AWS::EC2::RouteTable
       Properties:
