@@ -241,6 +241,33 @@ resources:
             FromPort: 5432
             ToPort: 5432
             SourceSecurityGroupId: !Ref LambdaSecurityGroup
+          - IpProtocol: tcp
+            FromPort: 5432
+            ToPort: 5432
+            SourceSecurityGroupId: !Ref EICEndpointSecurityGroup
+
+    EICEndpointSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security group for EIC Endpoint
+        VpcId: !Ref VPC
+        SecurityGroupEgress: [] # Breaks circular dependency
+
+    EICEndpointToDBEgress:
+      Type: AWS::EC2::SecurityGroupEgress
+      Properties:
+        GroupId: !Ref EICEndpointSecurityGroup
+        IpProtocol: tcp
+        FromPort: 5432
+        ToPort: 5432
+        DestinationSecurityGroupId: !Ref DBSecurityGroup
+
+    EICEndpoint:
+      Type: AWS::EC2::InstanceConnectEndpoint
+      Properties:
+        SubnetId: !Ref PrivateSubnetA
+        SecurityGroupIds:
+          - !Ref EICEndpointSecurityGroup
 
     # --- RDS Resources ---
     DBSubnetGroup:
