@@ -1,4 +1,15 @@
+import { useAuth } from "../lib/AuthContext";
+import { Dashboard } from "./Dashboard";
+
 export const Landing = () => {
+  const { user, is_loading } = useAuth();
+
+  if (is_loading) return null;
+
+  if (user) {
+    return <Dashboard />;
+  }
+
   return (
     <>
       {/* Badge */}

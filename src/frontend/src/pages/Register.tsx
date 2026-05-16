@@ -1,9 +1,11 @@
 import { startRegistration } from "@simplewebauthn/browser";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
 
 export const Register = () => {
   const { load_my_details: refresh } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("testuser");
   const [email, setEmail] = useState("test@example.com");
   const [status, setStatus] = useState<{
@@ -64,6 +66,7 @@ export const Register = () => {
 
       setFeedback("Registration successful! Your account is ready.");
       await refresh();
+      navigate("/");
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "An unknown error occurred";

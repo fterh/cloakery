@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
 import { Glows } from "./Glows";
 
@@ -9,10 +9,16 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout, is_loading } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const isRegister = location.pathname === "/register";
   const isLogin = location.pathname === "/login";
   const isAuthPage = isRegister || isLogin;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden font-sans selection:bg-blue-500 selection:text-white bg-slate-900 text-slate-100">
@@ -38,7 +44,7 @@ export const Layout = ({ children }: LayoutProps) => {
                 </span>
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
                 >
                   Logout
