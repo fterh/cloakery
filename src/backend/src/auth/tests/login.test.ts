@@ -7,19 +7,19 @@ import type {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { makeJWT, makeJWTCookie } from "../../lib/cookies.js";
 import {
   getPasskey,
   getUserWithPasskeys,
   updatePasskeyCounter,
 } from "../../lib/db.js";
 import { kv } from "../../lib/kv.js";
-import { makeJWT, makeJWTCookie } from "../../lib/session.js";
 import { options, verify } from "../login.js";
 
 // Mock dependencies
 vi.mock("../../lib/db.js");
 vi.mock("../../lib/kv.js");
-vi.mock("../../lib/session.js");
+vi.mock("../../lib/cookies.js");
 vi.mock("@simplewebauthn/server");
 
 describe("login.options", () => {
