@@ -16,12 +16,16 @@ export const makeJWTCookie = (token: string): string => {
   return `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
 };
 
-export const getVerifiedUserID = (
-  cookieHeader: string | undefined,
-): string | null => {
-  if (!cookieHeader) return null;
+export const clearSessionCookie = (): string => {
+  return "session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+};
 
-  const cookies = cookieHeader.split(";").reduce(
+export const getVerifiedUserID = (
+  cookies: string[] | undefined,
+): string | null => {
+  if (!cookies) return null;
+
+  const cookiesMap = cookies.reduce(
     (acc, cookie) => {
       const [key, value] = cookie.trim().split("=");
       if (key && value) {
@@ -32,7 +36,7 @@ export const getVerifiedUserID = (
     {} as Record<string, string>,
   );
 
-  const token = cookies.session;
+  const token = cookiesMap.session;
   if (!token) return null;
 
   try {

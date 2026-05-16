@@ -7,9 +7,9 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
+import { makeJWT, makeJWTCookie } from "../lib/cookies.js";
 import { createUserWithPasskey, userExists } from "../lib/db.js";
 import { kv } from "../lib/kv.js";
-import { makeJWT, makeJWTCookie } from "../lib/session.js";
 
 const AUTH_CHALLENGE_TTL = 300; // 5-minute TTL
 const RP_ID = process.env.RP_ID;

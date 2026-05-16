@@ -94,6 +94,17 @@ export const createUserWithPasskey = async (params: {
   });
 };
 
+export const getUserById = async (
+  id: string,
+): Promise<{ id: string; email: string; username: string } | null> => {
+  const user = await db
+    .selectFrom("users")
+    .select(["id", "email", "username"])
+    .where("id", "=", id)
+    .executeTakeFirst();
+  return user || null;
+};
+
 export const getUserWithPasskeys = async (
   username: string,
 ): Promise<{
