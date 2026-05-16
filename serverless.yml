@@ -184,18 +184,48 @@ resources:
         CidrBlock: 10.0.4.0/24
         AvailabilityZone: ${self:provider.region}b
 
-    # NAT Gateway
-    NatEip:
-      Type: AWS::EC2::EIP
-      DependsOn: VPCGatewayAttachment
+    # --- VPC Endpoints (Cost Optimization) ---
+    # Gateway Endpoints (Free)
+    DynamoDBEndpoint:
+      Type: AWS::EC2::VPCEndpoint
       Properties:
-        Domain: vpc
+        ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
+        VpcId: !Ref VPC
+        RouteTableIds:
+          - !Ref PrivateRouteTable
 
-    NatGateway:
-      Type: AWS::EC2::NatGateway
+    S3Endpoint:
+      Type: AWS::EC2::VPCEndpoint
       Properties:
-        AllocationId: !GetAtt NatEip.AllocationId
-        SubnetId: !Ref PublicSubnetA
+        ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+        VpcId: !Ref VPC
+        RouteTableIds:
+          - !Ref PrivateRouteTable
+
+    # Interface Endpoints (Low Cost)
+    SESEndpoint:
+      Type: AWS::EC2::VPCEndpoint
+      Properties:
+        ServiceName: !Sub com.amazonaws.${AWS::Region}.email
+        VpcId: !Ref VPC
+        VpcEndpointType: Interface
+        PrivateDnsEnabled: true
+        SubnetIds:
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+        SecurityGroupIds:
+          - !Ref SESEndpointSecurityGroup
+
+    SESEndpointSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security group for SES VPC Endpoint
+        VpcId: !Ref VPC
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            SourceSecurityGroupId: !Ref LambdaSecurityGroup
 
     # Route Tables
     PublicRouteTable:
@@ -226,13 +256,6 @@ resources:
       Type: AWS::EC2::RouteTable
       Properties:
         VpcId: !Ref VPC
-
-    PrivateRoute:
-      Type: AWS::EC2::Route
-      Properties:
-        RouteTableId: !Ref PrivateRouteTable
-        DestinationCidrBlock: 0.0.0.0/0
-        NatGatewayId: !Ref NatGateway
 
     PrivateSubnetARouteTableAssociation:
       Type: AWS::EC2::SubnetRouteTableAssociation
