@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../lib/AuthContext";
 import { Glows } from "./Glows";
 
 interface LayoutProps {
@@ -7,6 +8,7 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
+  const { user, logout, is_loading } = useAuth();
   const location = useLocation();
   const isRegister = location.pathname === "/register";
   const isLogin = location.pathname === "/login";
@@ -23,19 +25,41 @@ export const Layout = ({ children }: LayoutProps) => {
           Cloakery
         </Link>
         {!isAuthPage && (
-          <div className="flex gap-4">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-            >
-              Register
-            </Link>
+          <div className="flex gap-4 items-center">
+            {is_loading ? (
+              <div className="h-9 w-24 bg-slate-800/50 rounded-lg animate-pulse" />
+            ) : user ? (
+              <>
+                <span className="text-sm text-slate-400">
+                  Hi,{" "}
+                  <span className="text-white font-medium">
+                    {user.username}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         )}
       </header>
