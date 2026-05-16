@@ -29,6 +29,10 @@ export async function up(db: Kysely<unknown>): Promise<void> {
 
   // Add trigger to users table
   await sql`
+    DROP TRIGGER IF EXISTS update_users_timestamp ON users;
+  `.execute(db);
+
+  await sql`
     CREATE TRIGGER update_users_timestamp
     BEFORE UPDATE ON users
     FOR EACH ROW
