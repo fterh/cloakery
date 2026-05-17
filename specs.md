@@ -55,9 +55,10 @@ The primary relational data is housed in Amazon RDS (PostgreSQL), while transien
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | id | UUID | PRIMARY KEY | Unique identifier for the alias. |
-| user\_id | UUID | FOREIGN KEY (CASCADE), NOT NULL | Reference to users.id. |
+| user_id | UUID | FOREIGN KEY (CASCADE), NOT NULL | Reference to users.id. |
 | alias | VARCHAR(255) | NOT NULL | The local-part prefix (e.g., shopping). |
-| is\_active | BOOLEAN | DEFAULT TRUE | Toggle to pause/resume forwarding. |
+| description | TEXT | | Optional description about the alias. |
+| is_active | BOOLEAN | DEFAULT TRUE | Toggle to pause/resume forwarding. |
 | created\_at | TIMESTAMPTZ | NOT NULL | System timestamp of alias creation. |
 
 *Constraint Note: A composite UNIQUE(user\_id, alias) constraint enforces that a user cannot create duplicate aliases. All foreign keys use ON DELETE CASCADE to ensure data integrity during user deletion.*

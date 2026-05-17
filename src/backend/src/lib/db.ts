@@ -21,6 +21,7 @@ interface AliasTable {
   id: string; // Internal UUID
   user_id: string; // FKey to users.id
   alias: string; // e.g. "shopping"
+  description: string | null;
   is_active: boolean;
   created_at: Date;
 }
