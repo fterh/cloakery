@@ -6,7 +6,7 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
-import { makeJWT, makeJWTCookie } from "../lib/cookies.js";
+import { makeJwt, makeJwtCookie } from "../lib/cookies.js";
 import {
   getPasskey,
   getUserWithPasskeys,
@@ -129,8 +129,8 @@ export const verify = async (
       );
       await kv.delete(challengeKey);
 
-      const token = makeJWT(stored.userId);
-      const cookie = makeJWTCookie(token);
+      const token = makeJwt(stored.userId);
+      const cookie = makeJwtCookie(token);
 
       return {
         statusCode: 200,

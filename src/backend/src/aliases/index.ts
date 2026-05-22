@@ -2,7 +2,7 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
-import { getVerifiedUserID } from "../lib/cookies.js";
+import { getVerifiedUserId } from "../lib/cookies.js";
 import {
   createAlias,
   deleteAlias,
@@ -21,7 +21,7 @@ const withAuth = (
   return async (
     event: APIGatewayProxyEventV2,
   ): Promise<APIGatewayProxyResultV2> => {
-    const userId = getVerifiedUserID(event.cookies);
+    const userId = getVerifiedUserId(event.cookies);
     if (!userId) {
       return {
         statusCode: 401,

@@ -7,7 +7,7 @@ import type {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeJWT, makeJWTCookie } from "../../lib/cookies.js";
+import { makeJwt, makeJwtCookie } from "../../lib/cookies.js";
 import {
   getPasskey,
   getUserWithPasskeys,
@@ -156,8 +156,8 @@ describe("login.verify", () => {
       authenticationInfo: { newCounter: 11 },
       // biome-ignore lint/suspicious/noExplicitAny: mocked types are complex to define manually
     } as any);
-    vi.mocked(makeJWT).mockReturnValue("mock-jwt");
-    vi.mocked(makeJWTCookie).mockReturnValue("session=mock-jwt; Path=/");
+    vi.mocked(makeJwt).mockReturnValue("mock-jwt");
+    vi.mocked(makeJwtCookie).mockReturnValue("session=mock-jwt; Path=/");
 
     const event = {
       body: JSON.stringify({

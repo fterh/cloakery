@@ -3,7 +3,7 @@ import type {
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getVerifiedUserID } from "../../lib/cookies.js";
+import { getVerifiedUserId } from "../../lib/cookies.js";
 import {
   createAlias,
   deleteAlias,
@@ -17,7 +17,7 @@ vi.mock("../../lib/db.js");
 vi.mock("../../lib/cookies.js");
 
 describe("Alias Handlers", () => {
-  const mockUserID = "user-123";
+  const mockUserId = "user-123";
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,7 +34,7 @@ describe("Alias Handlers", () => {
     });
 
     it("should return 200 and list of aliases", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       const mockAliases = [
         { id: "alias-1", alias: "shopping", description: "for shopping" },
       ];
@@ -49,13 +49,13 @@ describe("Alias Handlers", () => {
 
       expect(result.statusCode).toBe(200);
       expect(JSON.parse(result.body || "[]")).toEqual(mockAliases);
-      expect(getAliasesByUserId).toHaveBeenCalledWith(mockUserID);
+      expect(getAliasesByUserId).toHaveBeenCalledWith(mockUserId);
     });
   });
 
   describe("POST /aliases", () => {
     it("should return 201 on successful creation", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       vi.mocked(createAlias).mockResolvedValue(
         "12345678-1234-1234-1234-123456789012",
       );
@@ -76,7 +76,7 @@ describe("Alias Handlers", () => {
     });
 
     it("should return 400 if alias is not a string", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
 
       const event = {
         cookies: ["session=valid"],
@@ -92,7 +92,7 @@ describe("Alias Handlers", () => {
     });
 
     it("should return 409 if alias already exists", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       const conflictError = new Error("Conflict");
       // biome-ignore lint/suspicious/noExplicitAny: mocked types are complex to define manually
       (conflictError as any).code = "23505";
@@ -111,7 +111,7 @@ describe("Alias Handlers", () => {
 
   describe("PATCH /aliases/{id}", () => {
     it("should return 200 on successful update", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       vi.mocked(updateAlias).mockResolvedValue([{ numUpdatedRows: 1n }]);
 
       const event = {
@@ -126,14 +126,14 @@ describe("Alias Handlers", () => {
       expect(JSON.parse(result.body || "{}").success).toBe(true);
       expect(updateAlias).toHaveBeenCalledWith({
         aliasId: "alias-1",
-        userId: mockUserID,
+        userId: mockUserId,
         isActive: false,
         description: undefined,
       });
     });
 
     it("should return 404 if alias not found", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       vi.mocked(updateAlias).mockResolvedValue([{ numUpdatedRows: 0n }]);
 
       const event = {
@@ -150,7 +150,7 @@ describe("Alias Handlers", () => {
 
   describe("DELETE /aliases/{id}", () => {
     it("should return 204 on successful deletion", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       vi.mocked(deleteAlias).mockResolvedValue([{ numDeletedRows: 1n }]);
 
       const event = {
@@ -164,7 +164,7 @@ describe("Alias Handlers", () => {
     });
 
     it("should return 404 if alias not found", async () => {
-      vi.mocked(getVerifiedUserID).mockReturnValue(mockUserID);
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
       vi.mocked(deleteAlias).mockResolvedValue([{ numDeletedRows: 0n }]);
 
       const event = {

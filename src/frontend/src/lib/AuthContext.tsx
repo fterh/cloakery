@@ -14,8 +14,8 @@ interface User {
 }
 
 interface AuthContextType {
-  is_loading: boolean;
-  load_my_details: () => Promise<void>;
+  isLoading: boolean;
+  loadMyDetails: () => Promise<void>;
   logout: () => Promise<void>;
   user: User | null;
 }
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load_my_details = useCallback(async () => {
+  const loadMyDetails = useCallback(async () => {
     try {
       const resp = await fetch("/auth/me");
       if (resp.ok) {
@@ -44,8 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    load_my_details();
-  }, [load_my_details]);
+    loadMyDetails();
+  }, [loadMyDetails]);
 
   const logout = async () => {
     try {
@@ -58,7 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ is_loading: loading, load_my_details, logout, user }}
+      value={{
+        isLoading: loading,
+        loadMyDetails: loadMyDetails,
+        logout,
+        user,
+      }}
     >
       {children}
     </AuthContext.Provider>
