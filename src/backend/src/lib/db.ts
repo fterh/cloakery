@@ -26,20 +26,29 @@ interface AliasTable {
   created_at: Date;
 }
 
+// Handle BigInts (Postgres INT8) as numbers to avoid string conversion issues with counters.
+pg.types.setTypeParser(pg.types.builtins.INT8, (value: string) =>
+  parseInt(value, 10),
+);
+
 export interface Database {
   users: UserTable;
   passkeys: PasskeyTable;
   aliases: AliasTable;
 }
 
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 1, // Optimize for Lambda: one connection per instance
+});
+
+// Error handling for the pool to prevent process crashes
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle database client", err);
+});
+
 const dialect = new PostgresDialect({
-  pool: new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 10,
-    ssl: {
-      rejectUnauthorized: false, // Required for RDS unless you bundle the AWS CA cert
-    },
-  }),
+  pool,
 });
 
 export const db = new Kysely<Database>({
