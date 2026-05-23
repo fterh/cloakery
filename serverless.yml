@@ -17,14 +17,7 @@ provider:
     cors: true
   environment:
     TABLE_NAME: !Ref CloakeryKV
-    DATABASE_URL: 
-      Fn::Join:
-        - ""
-        - - "postgres://cloakery_admin:"
-          - ${param:db_password}
-          - "@"
-          - !GetAtt CloakeryDB.Endpoint.Address
-          - ":5432/cloakery"
+    DATABASE_URL: ${param:database_url}
     JWT_SECRET: ${param:jwt_secret}
     RP_ID: ${param:domain}
     RP_NAME: "Cloakery"
@@ -39,13 +32,6 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:Query
           Resource: !GetAtt CloakeryKV.Arn
-
-custom:
-  vpcConfig: &vpcConfig
-    securityGroupIds:
-      - !Ref LambdaSecurityGroup
-    subnetIds:
-      - !Ref PrivateSubnetA # Single AZ for cost optimization
 
 build:
   esbuild:
@@ -70,21 +56,15 @@ functions:
           path: /test
           method: get
 
-  migrate:
-    handler: src/backend/src/lib/migrate.handler
-    vpc: *vpcConfig
-
   # Passkey Authentication - Registration
   registerOptions:
     handler: src/backend/src/auth/register.options
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/register/options
           method: post
   registerVerify:
     handler: src/backend/src/auth/register.verify
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/register/verify
@@ -93,14 +73,12 @@ functions:
   # Passkey Authentication - Login
   loginOptions:
     handler: src/backend/src/auth/login.options
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/login/options
           method: post
   loginVerify:
     handler: src/backend/src/auth/login.verify
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/login/verify
@@ -109,7 +87,6 @@ functions:
   # Session Initialization
   me:
     handler: src/backend/src/auth/session.me
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /auth/me
@@ -126,28 +103,24 @@ functions:
   # Alias Management
   listAliases:
     handler: src/backend/src/aliases/index.get
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /aliases
           method: get
   createAlias:
     handler: src/backend/src/aliases/index.post
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /aliases
           method: post
   updateAlias:
     handler: src/backend/src/aliases/index.patch
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /aliases/{id}
           method: patch
   removeAlias:
     handler: src/backend/src/aliases/index.del
-    vpc: *vpcConfig
     events:
       - httpApi:
           path: /aliases/{id}
@@ -165,141 +138,6 @@ functions:
 
 resources:
   Resources:
-    # --- Networking (VPC) ---
-    VPC:
-      Type: AWS::EC2::VPC
-      Properties:
-        CidrBlock: 10.0.0.0/16
-        EnableDnsSupport: true
-        EnableDnsHostnames: true
-        Tags:
-          - Key: Name
-            Value: ${self:service}-${sls:stage}-vpc
-
-    # Private Subnets (for RDS and Lambda)
-    PrivateSubnetA:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: !Ref VPC
-        CidrBlock: 10.0.3.0/24
-        AvailabilityZone: ${self:provider.region}a
-
-    PrivateSubnetB:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: !Ref VPC
-        CidrBlock: 10.0.4.0/24
-        AvailabilityZone: ${self:provider.region}b
-
-    # --- VPC Endpoints (Cost Optimization) ---
-    # Gateway Endpoints (Free)
-    DynamoDBEndpoint:
-      Type: AWS::EC2::VPCEndpoint
-      Properties:
-        ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
-        VpcId: !Ref VPC
-        RouteTableIds:
-          - !Ref PrivateRouteTable
-
-    S3Endpoint:
-      Type: AWS::EC2::VPCEndpoint
-      Properties:
-        ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
-        VpcId: !Ref VPC
-        RouteTableIds:
-          - !Ref PrivateRouteTable
-
-    # Interface Endpoints (Low Cost)
-    SESEndpoint:
-      Type: AWS::EC2::VPCEndpoint
-      Properties:
-        ServiceName: !Sub com.amazonaws.${AWS::Region}.email
-        VpcId: !Ref VPC
-        VpcEndpointType: Interface
-        PrivateDnsEnabled: true
-        SubnetIds:
-          - !Ref PrivateSubnetA
-        SecurityGroupIds:
-          - !Ref SESEndpointSecurityGroup
-
-    SESEndpointSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Security group for SES VPC Endpoint
-        VpcId: !Ref VPC
-        SecurityGroupIngress:
-          - IpProtocol: tcp
-            FromPort: 443
-            ToPort: 443
-            SourceSecurityGroupId: !Ref LambdaSecurityGroup
-
-    # Route Tables
-    PrivateRouteTable:
-      Type: AWS::EC2::RouteTable
-      Properties:
-        VpcId: !Ref VPC
-
-    PrivateSubnetARouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        SubnetId: !Ref PrivateSubnetA
-        RouteTableId: !Ref PrivateRouteTable
-
-    PrivateSubnetBRouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-        SubnetId: !Ref PrivateSubnetB
-        RouteTableId: !Ref PrivateRouteTable
-
-    # --- Security Groups ---
-    LambdaSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Security group for Cloakery Lambda functions
-        VpcId: !Ref VPC
-        SecurityGroupEgress:
-          - IpProtocol: -1
-            CidrIp: 0.0.0.0/0
-
-    DBSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Security group for Cloakery RDS instance
-        VpcId: !Ref VPC
-        SecurityGroupIngress:
-          - IpProtocol: tcp
-            FromPort: 5432
-            ToPort: 5432
-            SourceSecurityGroupId: !Ref LambdaSecurityGroup
-
-    # --- RDS Resources ---
-    DBSubnetGroup:
-      Type: AWS::RDS::DBSubnetGroup
-      Properties:
-        DBSubnetGroupDescription: Subnets for Cloakery RDS
-        SubnetIds:
-          - !Ref PrivateSubnetA
-          - !Ref PrivateSubnetB
-
-    CloakeryDB:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        DBInstanceIdentifier: ${self:service}-${sls:stage}-db
-        DBName: cloakery
-        Engine: postgres
-        EngineVersion: "16"
-        DBInstanceClass: db.t4g.micro
-        AllocatedStorage: "20"
-        MasterUsername: cloakery_admin
-        MasterUserPassword: ${param:db_password}
-        DBSubnetGroupName: !Ref DBSubnetGroup
-        VPCSecurityGroups:
-          - !Ref DBSecurityGroup
-        PubliclyAccessible: false
-        StorageType: gp3
-        BackupRetentionPeriod: 7
-        DeletionProtection: false # Set to true for production
-
     # --- Other Resources ---
     CloakeryKV:
       Type: AWS::DynamoDB::Table
@@ -438,4 +276,3 @@ resources:
       Value: !Ref StaticSiteBucket
     CloudFrontDistributionId:
       Value: !Ref StaticSiteDistribution
-

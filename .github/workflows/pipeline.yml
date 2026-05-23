@@ -60,7 +60,6 @@ jobs:
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD_DEV }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
       JWT_SECRET: ${{ secrets.JWT_SECRET_DEV }}
 
@@ -79,6 +78,5 @@ jobs:
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD_PROD }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
       JWT_SECRET: ${{ secrets.JWT_SECRET_PROD }}
