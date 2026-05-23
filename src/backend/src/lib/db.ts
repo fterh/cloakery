@@ -21,6 +21,7 @@ interface AliasTable {
   id: string; // Internal UUID
   user_id: string; // FKey to users.id
   alias: string; // e.g. "shopping"
+  description: string | null;
   is_active: boolean;
   created_at: Date;
 }
@@ -44,6 +45,8 @@ const dialect = new PostgresDialect({
 export const db = new Kysely<Database>({
   dialect,
 });
+
+// --- Auth Helpers ---
 
 export const userExists = async (
   email: string,
@@ -153,5 +156,66 @@ export const updatePasskeyCounter = async (
     .updateTable("passkeys")
     .set({ counter })
     .where("id", "=", credentialId)
+    .execute();
+};
+
+// --- Alias Helpers ---
+
+export const getAliasesByUserId = async (userId: string) => {
+  return await db
+    .selectFrom("aliases")
+    .selectAll()
+    .where("user_id", "=", userId)
+    .orderBy("created_at", "desc")
+    .execute();
+};
+
+export const createAlias = async (params: {
+  userId: string;
+  alias: string;
+  description?: string;
+}) => {
+  const id = crypto.randomUUID();
+  await db
+    .insertInto("aliases")
+    .values({
+      id,
+      user_id: params.userId,
+      alias: params.alias,
+      description: params.description ?? null,
+      is_active: true,
+      created_at: new Date(),
+    })
+    .execute();
+  return id;
+};
+
+export const updateAlias = async (params: {
+  aliasId: string;
+  userId: string;
+  isActive?: boolean;
+  description?: string;
+}) => {
+  return await db
+    .updateTable("aliases")
+    .set({
+      ...(params.isActive !== undefined && { is_active: params.isActive }),
+      ...(params.description !== undefined && {
+        description: params.description,
+      }),
+    })
+    .where("id", "=", params.aliasId)
+    .where("user_id", "=", params.userId)
+    .execute();
+};
+
+export const deleteAlias = async (params: {
+  aliasId: string;
+  userId: string;
+}) => {
+  return await db
+    .deleteFrom("aliases")
+    .where("id", "=", params.aliasId)
+    .where("user_id", "=", params.userId)
     .execute();
 };

@@ -1,30 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { getVerifiedUserID, makeJWT } from "../cookies.js";
+import { getVerifiedUserId, makeJwt } from "../cookies.js";
 
 describe("getVerifiedUserID", () => {
   it("should return null if no cookies are provided", () => {
-    expect(getVerifiedUserID(undefined)).toBeNull();
+    expect(getVerifiedUserId(undefined)).toBeNull();
   });
 
   it("should return null if session cookie is missing", () => {
-    expect(getVerifiedUserID(["foo=bar", "baz=qux"])).toBeNull();
+    expect(getVerifiedUserId(["foo=bar", "baz=qux"])).toBeNull();
   });
 
   it("should return userId if session cookie is valid", () => {
     const userId = "test-user-id";
-    const token = makeJWT(userId);
-    expect(getVerifiedUserID([`session=${token}`])).toBe(userId);
+    const token = makeJwt(userId);
+    expect(getVerifiedUserId([`session=${token}`])).toBe(userId);
   });
 
   it("should return userId when multiple cookies are present", () => {
     const userId = "test-user-id";
-    const token = makeJWT(userId);
+    const token = makeJwt(userId);
     expect(
-      getVerifiedUserID(["other=value", `session=${token}`, "foo=bar"]),
+      getVerifiedUserId(["other=value", `session=${token}`, "foo=bar"]),
     ).toBe(userId);
   });
 
   it("should return null if token is invalid", () => {
-    expect(getVerifiedUserID(["session=invalid-token"])).toBeNull();
+    expect(getVerifiedUserId(["session=invalid-token"])).toBeNull();
   });
 });

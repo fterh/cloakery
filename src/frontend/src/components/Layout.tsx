@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { user, logout, is_loading } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isRegister = location.pathname === "/register";
@@ -32,7 +32,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </Link>
         {!isAuthPage && (
           <div className="flex gap-4 items-center">
-            {is_loading ? (
+            {isLoading ? (
               <div className="h-9 w-24 bg-slate-800/50 rounded-lg animate-pulse" />
             ) : user ? (
               <>

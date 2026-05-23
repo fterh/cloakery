@@ -70,6 +70,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
       col.references("users.id").onDelete("cascade").notNull(),
     )
     .addColumn("alias", "varchar(255)", (col) => col.notNull())
+    .addColumn("description", "text")
     .addColumn("is_active", "boolean", (col) => col.defaultTo(true).notNull())
     .addColumn("created_at", "timestamptz", (col) =>
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull(),

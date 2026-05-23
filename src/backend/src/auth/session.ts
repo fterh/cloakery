@@ -2,13 +2,13 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
-import { clearSessionCookie, getVerifiedUserID } from "../lib/cookies.js";
+import { clearSessionCookie, getVerifiedUserId } from "../lib/cookies.js";
 import { getUserById } from "../lib/db.js";
 
 export const me = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  const userId = getVerifiedUserID(event.cookies);
+  const userId = getVerifiedUserId(event.cookies);
 
   if (!userId) {
     return {

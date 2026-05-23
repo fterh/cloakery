@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
 
 export const Login = () => {
-  const { load_my_details: refresh } = useAuth();
+  const { loadMyDetails: refresh } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{

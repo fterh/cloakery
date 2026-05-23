@@ -6,11 +6,11 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is not set");
 }
 
-export const makeJWT = (userId: string): string => {
+export const makeJwt = (userId: string): string => {
   return jwt.sign({ sub: userId }, JWT_SECRET, { expiresIn: "7d" });
 };
 
-export const makeJWTCookie = (token: string): string => {
+export const makeJwtCookie = (token: string): string => {
   // Max-Age is in seconds (7 days)
   const maxAge = 7 * 24 * 60 * 60;
   return `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
@@ -20,7 +20,7 @@ export const clearSessionCookie = (): string => {
   return "session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
 };
 
-export const getVerifiedUserID = (
+export const getVerifiedUserId = (
   cookies: string[] | undefined,
 ): string | null => {
   if (!cookies) return null;

@@ -123,6 +123,36 @@ functions:
           path: /auth/logout
           method: post
 
+  # Alias Management
+  listAliases:
+    handler: src/backend/src/aliases/index.get
+    vpc: *vpcConfig
+    events:
+      - httpApi:
+          path: /aliases
+          method: get
+  createAlias:
+    handler: src/backend/src/aliases/index.post
+    vpc: *vpcConfig
+    events:
+      - httpApi:
+          path: /aliases
+          method: post
+  updateAlias:
+    handler: src/backend/src/aliases/index.patch
+    vpc: *vpcConfig
+    events:
+      - httpApi:
+          path: /aliases/{id}
+          method: patch
+  removeAlias:
+    handler: src/backend/src/aliases/index.del
+    vpc: *vpcConfig
+    events:
+      - httpApi:
+          path: /aliases/{id}
+          method: delete
+
   # Inbound Email Pipeline
   inboundProcessor:
     handler: src/backend/src/email/inbound.handler
@@ -335,6 +365,14 @@ resources:
               OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3 # AllViewer
             # Route /auth/* to API Gateway
             - PathPattern: /auth/*
+              TargetOriginId: ApiOrigin
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+              # Use Managed Policies
+              CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
+              OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3 # AllViewer
+            # Route /aliases* to API Gateway
+            - PathPattern: /aliases*
               TargetOriginId: ApiOrigin
               ViewerProtocolPolicy: redirect-to-https
               AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
