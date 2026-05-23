@@ -19,6 +19,8 @@ on:
         required: true
       DB_PASSWORD:
         required: true
+      DATABASE_URL:
+        required: true
       JWT_SECRET:
         required: true
 
