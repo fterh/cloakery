@@ -21,6 +21,12 @@ on:
         required: true
       JWT_SECRET:
         required: true
+      SUPABASE_ACCESS_TOKEN:
+        required: true
+      SUPABASE_PROJECT_ID:
+        required: true
+      SUPABASE_DB_PASSWORD:
+        required: true
 
 jobs:
   deploy:
@@ -48,16 +54,18 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-west-1
 
+      - name: Run Database Migrations
+        run: |
+          npx supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} --password ${{ secrets.SUPABASE_DB_PASSWORD }}
+          npx supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Serverless Deploy
         id: deploy
         run: npx serverless deploy --debug --stage ${{ inputs.stage }} --param="domain=${{ inputs.domain }}" --param="domain_certificate_arn=${{ inputs.domain_certificate_arn }}" --param="database_url=${{ secrets.DATABASE_URL }}" --param="jwt_secret=${{ secrets.JWT_SECRET }}"
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-
-      - name: Run Database Migrations
-        run: |
-          # Migrations are now handled by Supabase CLI (to be implemented)
-          echo "Skipping Lambda-based migrations..."
 
       - name: Query Outputs
         id: query_outputs
