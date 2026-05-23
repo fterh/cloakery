@@ -32,9 +32,9 @@ const withAuth = (
   };
 };
 
-const isValidAlias = (_alias: string): boolean => {
-  // TODO: implement alias validation
-  return true;
+export const isValidAlias = (alias: string): boolean => {
+  const aliasRegex = /^(?=[a-z0-9_-]{1,64}$)[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
+  return aliasRegex.test(alias);
 };
 
 // --- Handlers ---

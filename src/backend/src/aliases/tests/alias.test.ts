@@ -10,11 +10,52 @@ import {
   getAliasesByUserId,
   updateAlias,
 } from "../../lib/db.js";
-import { del, get, patch, post } from "../index.js";
+import { del, get, isValidAlias, patch, post } from "../index.js";
 
 // Mock dependencies
 vi.mock("../../lib/db.js");
 vi.mock("../../lib/cookies.js");
+
+describe("Alias Validation", () => {
+  it("should pass for valid aliases", () => {
+    expect(isValidAlias("hello")).toBe(true);
+    expect(isValidAlias("hello-world")).toBe(true);
+    expect(isValidAlias("hello_world")).toBe(true);
+    expect(isValidAlias("a")).toBe(true);
+    expect(isValidAlias("a-b_c")).toBe(true);
+    expect(isValidAlias("123")).toBe(true);
+    expect(isValidAlias("a".repeat(64))).toBe(true);
+  });
+
+  it("should fail for uppercase characters", () => {
+    expect(isValidAlias("HELLO")).toBe(false);
+    expect(isValidAlias("Hello")).toBe(false);
+  });
+
+  it("should fail for invalid characters", () => {
+    expect(isValidAlias("hello.world")).toBe(false);
+    expect(isValidAlias("hello world")).toBe(false);
+    expect(isValidAlias("hello@world")).toBe(false);
+  });
+
+  it("should fail for leading or trailing symbols", () => {
+    expect(isValidAlias("-hello")).toBe(false);
+    expect(isValidAlias("_hello")).toBe(false);
+    expect(isValidAlias("hello-")).toBe(false);
+    expect(isValidAlias("hello_")).toBe(false);
+  });
+
+  it("should fail for consecutive symbols", () => {
+    expect(isValidAlias("hello--world")).toBe(false);
+    expect(isValidAlias("hello__world")).toBe(false);
+    expect(isValidAlias("hello-_world")).toBe(false);
+  });
+
+  it("should fail for invalid lengths", () => {
+    expect(isValidAlias("")).toBe(false);
+    expect(isValidAlias("a".repeat(65))).toBe(false);
+  });
+});
 
 describe("Alias Handlers", () => {
   const mockUserId = "user-123";
