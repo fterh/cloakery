@@ -17,9 +17,15 @@ on:
         required: true
       SERVERLESS_ACCESS_KEY:
         required: true
-      DB_PASSWORD:
+      DATABASE_URL:
         required: true
       JWT_SECRET:
+        required: true
+      SUPABASE_ACCESS_TOKEN:
+        required: true
+      SUPABASE_PROJECT_ID:
+        required: true
+      SUPABASE_DB_PASSWORD:
         required: true
 
 jobs:
@@ -48,21 +54,18 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-west-1
 
-      - name: Serverless Deploy
-        id: deploy
-        run: npx serverless deploy --debug --stage ${{ inputs.stage }} --param="domain=${{ inputs.domain }}" --param="domain_certificate_arn=${{ inputs.domain_certificate_arn }}" --param="db_password=${{ secrets.DB_PASSWORD }}" --param="jwt_secret=${{ secrets.JWT_SECRET }}"
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-
       - name: Run Database Migrations
         run: |
-          aws lambda invoke \
-            --function-name cloakery-${{ inputs.stage }}-migrate \
-            --payload '{}' \
-            --cli-binary-format raw-in-base64-out \
-            out.json
-          cat out.json
-          if grep -q "error" out.json; then exit 1; fi
+          npx supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} --password ${{ secrets.SUPABASE_DB_PASSWORD }}
+          npx supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Serverless Deploy
+        id: deploy
+        run: npx serverless deploy --debug --stage ${{ inputs.stage }} --param="domain=${{ inputs.domain }}" --param="domain_certificate_arn=${{ inputs.domain_certificate_arn }}" --param="database_url=${{ secrets.DATABASE_URL }}" --param="jwt_secret=${{ secrets.JWT_SECRET }}"
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
       - name: Query Outputs
         id: query_outputs
