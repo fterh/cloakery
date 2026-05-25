@@ -5,8 +5,8 @@ provider:
   runtime: nodejs24.x
   region: us-west-1
   domain:
-    name: ${param:domain}
-    certificateArn: ${param:domain_certificate_arn}
+    name: ${param:domain, 'localhost'}
+    certificateArn: ${param:domain_certificate_arn, 'arn:aws:acm:us-east-1:000000000000:certificate/local'}
     createRoute53Record: false
   stage: ${opt:stage, 'dev'}
   architecture: arm64 # Faster and cheaper than x86_64
@@ -17,9 +17,10 @@ provider:
     cors: true
   environment:
     TABLE_NAME: !Ref CloakeryKV
-    DATABASE_URL: ${param:database_url}
-    JWT_SECRET: ${param:jwt_secret}
-    RP_ID: ${param:domain}
+    TABLE_NAME_LOCAL_DEV: ${env:TABLE_NAME_LOCAL_DEV, ''}
+    DATABASE_URL: ${param:database_url, env:DATABASE_URL}
+    JWT_SECRET: ${param:jwt_secret, env:JWT_SECRET}
+    RP_ID: ${param:domain, 'localhost'}
     RP_NAME: "Cloakery"
   iam:
     role:
@@ -44,6 +45,9 @@ build:
     format: esm
     banner:
       js: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);"
+
+plugins:
+  - serverless-offline
 
 functions:
   # Proof of Life
@@ -218,9 +222,9 @@ resources:
               CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
               OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3 # AllViewer
           Aliases:
-            - ${param:domain}
+            - ${param:domain, 'localhost'}
           ViewerCertificate:
-            AcmCertificateArn: ${param:domain_certificate_arn}
+            AcmCertificateArn: ${param:domain_certificate_arn, 'arn:aws:acm:us-east-1:000000000000:certificate/local'}
             SslSupportMethod: sni-only
             MinimumProtocolVersion: TLSv1.2_2021
 

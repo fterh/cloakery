@@ -11,6 +11,14 @@ privacy-first email relay service
 
 ## Setup
 
+### Local development
+
+AWS CLI must be installed and set up properly.
+`.env.example` must be populated and renamed to `.env`.
+
+Run `npm run dev` to develop locally against your dev infrastructure. 
+This will send requests to your dev stage AWS infrastructure and Supabase instances.
+
 ### Domain
 
 Assuming that your domain was not registered and configured through AWS, there are some manual steps:

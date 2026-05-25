@@ -21,7 +21,9 @@ if (!RP_ID) {
   throw new Error("Missing RP_ID environment variable");
 }
 
-const ORIGIN = `https://${RP_ID}`;
+const ORIGIN = process.env.IS_OFFLINE
+  ? "http://localhost:5173" // Default Vite port
+  : `https://${RP_ID}`;
 
 export const options = async (
   event: APIGatewayProxyEventV2,
