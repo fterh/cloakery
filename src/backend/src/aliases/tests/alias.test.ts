@@ -2,19 +2,22 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
+import { generateSlug } from "random-word-slugs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getVerifiedUserId } from "../../lib/cookies.js";
 import {
+  aliasExists,
   createAlias,
   deleteAlias,
   getAliasesByUserId,
   updateAlias,
 } from "../../lib/db.js";
-import { del, get, isValidAlias, patch, post } from "../index.js";
+import { del, generate, get, isValidAlias, patch, post } from "../index.js";
 
 // Mock dependencies
 vi.mock("../../lib/db.js");
 vi.mock("../../lib/cookies.js");
+vi.mock("random-word-slugs");
 
 describe("Alias Validation", () => {
   it("should pass for valid aliases", () => {
@@ -91,6 +94,68 @@ describe("Alias Handlers", () => {
       expect(result.statusCode).toBe(200);
       expect(JSON.parse(result.body || "[]")).toEqual(mockAliases);
       expect(getAliasesByUserId).toHaveBeenCalledWith(mockUserId);
+    });
+  });
+
+  describe("GET /aliases/generate", () => {
+    it("should return 200 and a unique slug", async () => {
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
+      vi.mocked(generateSlug).mockReturnValue("cool-slug");
+      vi.mocked(aliasExists).mockResolvedValue(false);
+
+      const event = {
+        cookies: ["session=valid"],
+      } as unknown as APIGatewayProxyEventV2;
+
+      const result = (await generate(
+        event,
+      )) as APIGatewayProxyStructuredResultV2;
+
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body || "{}").alias).toBe("cool-slug");
+      expect(aliasExists).toHaveBeenCalledWith(mockUserId, "cool-slug");
+    });
+
+    it("should retry if slug is not unique", async () => {
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
+      vi.mocked(generateSlug)
+        .mockReturnValueOnce("taken-slug")
+        .mockReturnValueOnce("fresh-slug");
+      vi.mocked(aliasExists)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+
+      const event = {
+        cookies: ["session=valid"],
+      } as unknown as APIGatewayProxyEventV2;
+
+      const result = (await generate(
+        event,
+      )) as APIGatewayProxyStructuredResultV2;
+
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body || "{}").alias).toBe("fresh-slug");
+      expect(aliasExists).toHaveBeenCalledTimes(2);
+    });
+
+    it("should return 500 if it fails to find a unique slug after 10 attempts", async () => {
+      vi.mocked(getVerifiedUserId).mockReturnValue(mockUserId);
+      vi.mocked(generateSlug).mockReturnValue("always-taken");
+      vi.mocked(aliasExists).mockResolvedValue(true);
+
+      const event = {
+        cookies: ["session=valid"],
+      } as unknown as APIGatewayProxyEventV2;
+
+      const result = (await generate(
+        event,
+      )) as APIGatewayProxyStructuredResultV2;
+
+      expect(result.statusCode).toBe(500);
+      expect(JSON.parse(result.body || "{}").error).toBe(
+        "Failed to generate a unique alias",
+      );
+      expect(aliasExists).toHaveBeenCalledTimes(10);
     });
   });
 
