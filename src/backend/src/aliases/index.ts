@@ -2,8 +2,10 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
+import { generateSlug } from "random-word-slugs";
 import { getVerifiedUserId } from "../lib/cookies.js";
 import {
+  aliasExists,
   createAlias,
   deleteAlias,
   getAliasesByUserId,
@@ -44,6 +46,33 @@ export const get = withAuth(async (userId) => {
   return {
     statusCode: 200,
     body: JSON.stringify(aliases),
+  };
+});
+
+export const generate = withAuth(async (userId) => {
+  let slug = "";
+  let isUnique = false;
+  let attempts = 0;
+
+  while (!isUnique && attempts < 10) {
+    slug = generateSlug();
+    isUnique = !(await aliasExists(userId, slug));
+    attempts++;
+  }
+
+  if (!isUnique) {
+    console.error(
+      "Failed to generate a unique alias. This should never happen.",
+    );
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Failed to generate a unique alias" }),
+    };
+  }
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ alias: slug }),
   };
 });
 

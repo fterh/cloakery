@@ -105,6 +105,12 @@ functions:
           method: post
 
   # Alias Management
+  generateAlias:
+    handler: src/backend/src/aliases/index.generate
+    events:
+      - httpApi:
+          path: /aliases/generate
+          method: get
   listAliases:
     handler: src/backend/src/aliases/index.get
     events:

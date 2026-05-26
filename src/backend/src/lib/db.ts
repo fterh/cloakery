@@ -179,6 +179,19 @@ export const getAliasesByUserId = async (userId: string) => {
     .execute();
 };
 
+export const aliasExists = async (
+  userId: string,
+  alias: string,
+): Promise<boolean> => {
+  const result = await db
+    .selectFrom("aliases")
+    .select("id")
+    .where("user_id", "=", userId)
+    .where("alias", "=", alias)
+    .executeTakeFirst();
+  return !!result;
+};
+
 export const createAlias = async (params: {
   userId: string;
   alias: string;
