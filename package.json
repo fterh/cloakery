@@ -16,7 +16,9 @@
   "main": "index.js",
   "scripts": {
     "test": "biome ci && tsc --project src/backend/tsconfig.json --noEmit && tsc --project src/frontend/tsconfig.json --noEmit && vitest run",
+    "dev:api": "serverless offline start",
     "dev:web": "vite src/frontend",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "build:web": "vite build src/frontend"
   },
   "devDependencies": {
@@ -30,10 +32,12 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
+    "concurrently": "^9.2.1",
     "serverless": "^4.33.0",
+    "serverless-offline": "^14.7.0",
     "supabase": "^2.101.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^8.0.13",
     "vitest": "^4.1.6"
   },
@@ -43,10 +47,13 @@
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.0",
     "jsonwebtoken": "^9.0.3",
-    "kysely": "^0.28.15",
+    "kysely": "^0.29.2",
     "pg": "^8.20.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1"
+  },
+  "overrides": {
+    "@hapi/statehood": "8.2.0"
   }
 }

@@ -8,7 +8,7 @@ import {
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = process.env.TABLE_NAME;
+const TABLE_NAME = process.env.TABLE_NAME_LOCAL_DEV || process.env.TABLE_NAME;
 
 if (!TABLE_NAME) {
   throw new Error("TABLE_NAME environment variable is not set");
