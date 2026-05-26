@@ -47,6 +47,13 @@ export const get = withAuth(async (userId) => {
   };
 });
 
+export const generate = withAuth(async (userId) => {
+  return {
+    statusCode: 501,
+    body: JSON.stringify({ error: "Not Implemented" }),
+  };
+});
+
 export const post = withAuth(async (userId, event) => {
   const { alias, description } = JSON.parse(event.body || "{}");
 
